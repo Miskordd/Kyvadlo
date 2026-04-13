@@ -1,0 +1,6 @@
+itexa-vm.ova
+*.ova
+venv/
+__pycache__/
+*.pyc
+.env
