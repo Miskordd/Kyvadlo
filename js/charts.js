@@ -35,6 +35,8 @@ class ChartManager {
     constructor() {
         this.charts = {};
         this.buf = { time: [], angle: [], omega: [], Ek: [], Ep: [], Et: [] };
+        this.periodBuf = { oscillation: [], period: [] };
+        this._lastTurningTimes = [];
         this.MAX = 600;
     }
 
@@ -44,6 +46,7 @@ class ChartManager {
         this._initVelocity();
         this._initPhase();
         this._initEnergy();
+        this._initPeriod();
     }
 
     _initAngle() {
@@ -92,6 +95,52 @@ class ChartManager {
         });
     }
 
+    _initPeriod() {
+        const ctx = document.getElementById('chart-period')?.getContext('2d');
+        if (!ctx) return;
+        this.charts.period = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [{
+                    label: 'Perióda T (s)',
+                    data: [],
+                    borderColor: '#c9a84c',
+                    backgroundColor: 'rgba(201,168,76,0.15)',
+                    borderWidth: 2,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#c9a84c',
+                    tension: 0.3,
+                    fill: true,
+                }]
+            },
+            options: {
+                ...makeChartOpts('Oscilácia #', 'Perióda T (s)'),
+                plugins: {
+                    ...CHART_DEFAULTS.plugins,
+                    title: { display: true, text: 'Perióda vs. čas — neizochronizmus pri veľkých uhloch', color: '#c9a84c' }
+                }
+            }
+        });
+    }
+
+    pushTurningPoint(time) {
+        this._lastTurningTimes.push(time);
+        const n = this._lastTurningTimes.length;
+        // každé 2 obraty = 1 plná oscilácia; perióda = tp[i+2] - tp[i]
+        if (n >= 3) {
+            const period = this._lastTurningTimes[n - 1] - this._lastTurningTimes[n - 3];
+            const oscillationIdx = Math.floor((n - 1) / 2);
+            this.periodBuf.oscillation.push(oscillationIdx);
+            this.periodBuf.period.push(period);
+            if (this.charts.period) {
+                this.charts.period.data.datasets[0].data = this.periodBuf.oscillation.map((o, i) => ({
+                    x: o, y: this.periodBuf.period[i]
+                }));
+                this.charts.period.update('none');
+            }
+        }
+    }
+
     push(time, angle, omega, Ek, Ep, Et) {
         const b = this.buf;
         b.time.push(time); b.angle.push(angle); b.omega.push(omega);
@@ -129,6 +178,8 @@ class ChartManager {
 
     clear() {
         ['time','angle','omega','Ek','Ep','Et'].forEach(k => this.buf[k] = []);
+        this.periodBuf = { oscillation: [], period: [] };
+        this._lastTurningTimes = [];
         Object.values(this.charts).forEach(c => {
             c.data.datasets.forEach(ds => ds.data = []);
             c.update('none');

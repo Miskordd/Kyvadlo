@@ -44,3 +44,8 @@ def server_info():
         "methods": ["euler", "runge_kutta_2", "runge_kutta_4", "analytical"],
         "websocket_endpoint": "ws://localhost:8000/ws/{simulation_id}",
     }
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

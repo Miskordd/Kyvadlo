@@ -244,6 +244,36 @@ def compare_methods(config_id: str, db: Session = Depends(get_db)):
     return {"config_id": config_id, "comparison": result}
 
 
+@router.post("/configurations/{config_id}/duplicate", response_model=ConfigurationResponse, status_code=201)
+def duplicate_configuration(config_id: str, db: Session = Depends(get_db)):
+    cfg = db.query(ConfigurationDB).filter(ConfigurationDB.id == config_id).first()
+    if not cfg:
+        raise HTTPException(status_code=404, detail="Konfigurácia nenájdená")
+    chars = compute_characteristics(cfg.length, cfg.mass, cfg.damping, cfg.initial_angle, cfg.initial_angular_velocity)
+    warnings, info = build_warnings_and_info(cfg.initial_angle, cfg.numerical_method, chars)
+    new_id = _make_config_id()
+    dup = ConfigurationDB(
+        id=new_id,
+        name=f"{cfg.name} (kópia)",
+        description=cfg.description,
+        length=cfg.length, mass=cfg.mass, damping=cfg.damping,
+        initial_angle=cfg.initial_angle,
+        initial_angular_velocity=cfg.initial_angular_velocity,
+        time_step=cfg.time_step, numerical_method=cfg.numerical_method,
+        oscillation_type=chars["oscillation_type"],
+        small_angle_period=chars["small_angle_period"],
+        approximate_period=chars.get("approximate_period"),
+        damping_type=chars["damping_type"],
+        damping_coefficient=chars["damping_coefficient"],
+        natural_frequency=chars["natural_frequency"],
+        initial_energy=chars["initial_energy"],
+    )
+    db.add(dup)
+    db.commit()
+    db.refresh(dup)
+    return _db_to_response(dup, warnings, info)
+
+
 @router.get("/presets")
 def get_presets():
     result = []

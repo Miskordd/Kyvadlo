@@ -355,6 +355,7 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 14px rgba(201,
   height: 240px; position: relative;
 }
 .chart-box canvas { width: 100% !important; height: 100% !important; }
+.chart-box-full { grid-column: 1 / -1; height: 200px; }
 
 /* Sim stats */
 .completed-stats {
@@ -396,6 +397,7 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 14px rgba(201,
 
 /* ── Education tab ───────────────────────────────────────────────────── */
 .edu-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.edu-panel-full { grid-column: 1 / -1; }
 @media (max-width: 900px) { .edu-layout { grid-template-columns: 1fr; } }
 
 .approx-error {
@@ -415,6 +417,8 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 14px rgba(201,
   cursor: pointer; transition: all 0.2s;
 }
 .edu-preset-btn:hover { border-color: var(--gold); color: var(--gold-light); }
+.looping-btn { border-color: rgba(248,113,113,0.35); color: var(--red); }
+.looping-btn:hover { border-color: var(--red); background: rgba(248,113,113,0.08); color: #fca5a5; }
 
 .tooltip-card {
   background: rgba(201,168,76,0.05); border: 1px solid var(--gold-dim);

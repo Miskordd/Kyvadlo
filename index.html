@@ -224,12 +224,13 @@
         <div class="val-item"><span class="val-label">Turning point</span><span class="val-num" id="val-turning" style="font-size:0.8rem">—</span></div>
       </div>
 
-      <!-- Charts 2×2 -->
+      <!-- Charts 2×2 + period -->
       <div class="charts-area">
         <div class="chart-box"><canvas id="chart-angle"></canvas></div>
         <div class="chart-box"><canvas id="chart-velocity"></canvas></div>
         <div class="chart-box"><canvas id="chart-phase"></canvas></div>
         <div class="chart-box"><canvas id="chart-energy"></canvas></div>
+        <div class="chart-box chart-box-full"><canvas id="chart-period"></canvas></div>
       </div>
 
       <!-- Completed stats -->
@@ -332,6 +333,41 @@
         </div>
       </div>
 
+      <!-- Animated comparison: nonlinear vs linearized -->
+      <div class="panel edu-panel-full">
+        <div class="panel-title">Animovaný rozdiel: presné vs. linearizované riešenie</div>
+
+        <div class="tooltip-card" style="margin-bottom:12px">
+          <h4>Čo tu vidíš?</h4>
+          Dve kyvadlá s rovnakým počiatočným uhlom bežia súčasne.<br/>
+          <span style="color:#c9a84c">■ Zlaté</span> — presné riešenie (numerické, <span class="math">sin(θ)</span>)<br/>
+          <span style="color:#4a9eff">■ Modré</span> — linearizované riešenie (<span class="math">θ</span> namiesto <span class="math">sin(θ)</span>)<br/>
+          Pre malé uhly sú takmer identické. Pri veľkých uhloch sa rozdiely rýchlo hromadia.
+        </div>
+
+        <div class="form-group" style="margin-bottom:10px">
+          <label class="form-label">Počiatočný uhol: <span id="anim-angle-display">30°</span></label>
+          <input type="range" id="anim-angle-slider" min="1" max="170" step="1" value="30" style="width:100%"/>
+          <div id="anim-phase-error" class="approx-error yellow" style="margin-top:6px">—</div>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap">
+          <button class="btn btn-secondary" id="btn-anim-play">▶ Spustiť</button>
+          <button class="btn btn-ghost" id="btn-anim-pause">⏸ Pauza</button>
+          <button class="btn btn-ghost" id="btn-anim-reset">↺ Reset</button>
+        </div>
+
+        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap">
+          <canvas id="canvas-compare-anim" width="560" height="300" style="border:1px solid var(--border); border-radius:var(--radius-lg); background:#0a0a14; max-width:100%"></canvas>
+          <div id="anim-live-stats" style="min-width:180px; display:flex; flex-direction:column; gap:8px; font-size:0.78rem; color:var(--muted); justify-content:center">
+            <div><span style="color:var(--gold)">Presné:</span> <span id="anim-exact-angle">—</span></div>
+            <div><span style="color:var(--blue)">Linearizované:</span> <span id="anim-linear-angle">—</span></div>
+            <div style="margin-top:4px">Rozdiel: <span id="anim-diff-angle" style="color:var(--red)">—</span></div>
+            <div>Čas: <span id="anim-time-display">0.00 s</span></div>
+          </div>
+        </div>
+      </div>
+
       <!-- Tooltip: Numerické metódy -->
       <div class="panel">
         <div class="panel-title">Numerické metódy</div>
@@ -366,6 +402,39 @@
           </div>
           <div style="font-size:0.72rem; color:var(--muted); margin-top:8px">
             Kliknutím predvyplníš formulár v záložke "Konfigurácie".
+          </div>
+        </div>
+      </div>
+
+      <!-- Looping demonstration -->
+      <div class="panel">
+        <div class="panel-title">🔄 Looping — kyvadlo "cez vrchol"</div>
+
+        <div class="tooltip-card">
+          <h4>Čo je looping?</h4>
+          Ak má kyvadlo dostatok energie, môže prejsť cez vrchol (θ = ±180°) a vykonať plný otáčivý pohyb — looping.<br/><br/>
+          Podmienka: počiatočná energia musí prekonať potenciálovú energiu vo vrchole:<br/>
+          <span class="math">E₀ ≥ 2mgL &nbsp;⟺&nbsp; |θ₀| → 180°</span><br/><br/>
+          Pri θ₀ = 179° je kyvadlo takmer vertikálne hore — najmenší impulz stačí na otočenie.
+        </div>
+
+        <div class="tooltip-card" style="border-color: rgba(248,113,113,0.3); background: rgba(248,113,113,0.04);">
+          <h4 style="color:var(--red)">⚠️ Dôležité</h4>
+          Pre looping je <b>nutné použiť numerickú metódu</b> (RK4).<br/>
+          Analytické riešenie (linearizácia) je pri takýchto uhloch úplne neplatné — chyba >100%!<br/>
+          Nastavenie analytickej metódy pre θ₀ ≥ 5° vyvolá kritické varovanie backendu.
+        </div>
+
+        <div style="margin-top:14px; display:flex; flex-direction:column; gap:8px">
+          <label class="form-label">Rýchle experimenty — looping:</label>
+          <button class="edu-preset-btn looping-btn" data-angle="170" title="Takmer vertikálne — looping s RK4">
+            θ₀ = 170° — Near vertical (looping)
+          </button>
+          <button class="edu-preset-btn looping-btn" data-angle="179" title="Extrémne — nestabilná rovnováha hore">
+            θ₀ = 179° — Nestabilná rovnováha
+          </button>
+          <div style="font-size:0.7rem; color:var(--muted); margin-top:4px">
+            Kliknutím predvyplníš formulár a prepneš sa do záložky "Konfigurácie". Odporúčame použiť metódu RK4 a malý časový krok (0.005 s).
           </div>
         </div>
       </div>

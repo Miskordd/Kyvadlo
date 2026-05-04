@@ -9,6 +9,7 @@ const api = {
             const err = await res.json().catch(() => ({ detail: res.statusText }));
             throw new Error(err.detail || 'Request failed');
         }
+        if (res.status === 204 || res.headers.get('content-length') === '0') return null;
         return res.json();
     },
 
@@ -24,6 +25,7 @@ const api = {
         validate: (data) => api.request('POST', '/api/pendulum/configurations/validate', data),
         getHistory: (id) => api.request('GET', `/api/pendulum/configurations/${id}/history`),
         compare: (id) => api.request('GET', `/api/pendulum/configurations/${id}/compare`),
+        duplicate: (id) => api.request('POST', `/api/pendulum/configurations/${id}/duplicate`),
     },
 
     simulations: {
