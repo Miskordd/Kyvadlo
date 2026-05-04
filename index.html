@@ -1,346 +1,430 @@
 <!DOCTYPE html>
 <html lang="sk">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Kyvadlo</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Raleway:wght@100;200&display=swap" rel="stylesheet"/>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg: #0a0a0f;
-      --gold: #c9a84c;
-      --gold-light: #e8c97a;
-      --cream: #f0ead6;
-      --muted: rgba(240,234,214,0.35);
-    }
-
-    body {
-      background: var(--bg);
-      color: var(--cream);
-      font-family: 'Raleway', sans-serif;
-      font-weight: 100;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      overflow: hidden;
-      position: relative;
-    }
-
-    /* Starfield */
-    .stars {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-    }
-    .star {
-      position: absolute;
-      background: white;
-      border-radius: 50%;
-      animation: twinkle var(--dur) ease-in-out infinite alternate;
-      opacity: 0;
-    }
-    @keyframes twinkle {
-      from { opacity: 0; transform: scale(0.6); }
-      to   { opacity: var(--op); transform: scale(1); }
-    }
-
-    /* Radial glow behind pendulum */
-    .glow-bg {
-      position: fixed;
-      top: 0; left: 50%;
-      transform: translateX(-50%);
-      width: 600px; height: 400px;
-      background: radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.12) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    /* Title */
-    header {
-      position: relative;
-      z-index: 10;
-      text-align: center;
-      margin-top: 52px;
-      letter-spacing: 0.35em;
-    }
-    header h1 {
-      font-family: 'Cormorant Garamond', serif;
-      font-weight: 300;
-      font-size: clamp(2.8rem, 7vw, 5rem);
-      color: var(--gold-light);
-      line-height: 1;
-      text-shadow: 0 0 60px rgba(201,168,76,0.4);
-    }
-    header p {
-      margin-top: 10px;
-      font-size: 0.68rem;
-      letter-spacing: 0.5em;
-      color: var(--muted);
-      text-transform: uppercase;
-    }
-
-    /* Decorative line */
-    .divider {
-      position: relative;
-      z-index: 10;
-      width: 220px;
-      height: 1px;
-      margin: 24px auto 0;
-      background: linear-gradient(90deg, transparent, var(--gold), transparent);
-      opacity: 0.6;
-    }
-
-    /* SVG pendulum stage */
-    .stage {
-      position: relative;
-      z-index: 10;
-      width: min(480px, 90vw);
-      margin-top: 10px;
-    }
-    .stage svg {
-      width: 100%;
-      height: auto;
-      overflow: visible;
-    }
-
-    /* Pendulum pivot decoration */
-    .pivot-cap {
-      fill: var(--gold);
-      filter: drop-shadow(0 0 6px rgba(201,168,76,0.8));
-    }
-
-    /* Pendulum rod */
-    .rod {
-      stroke: url(#rodGrad);
-      stroke-width: 2;
-      stroke-linecap: round;
-      fill: none;
-    }
-
-    /* Bob */
-    .bob-outer {
-      fill: url(#bobGrad);
-      filter: drop-shadow(0 0 12px rgba(201,168,76,0.7));
-    }
-    .bob-inner {
-      fill: rgba(255,255,220,0.15);
-    }
-    .bob-shine {
-      fill: rgba(255,255,240,0.45);
-    }
-
-    /* Swing animation */
-    .pendulum-group {
-      transform-origin: 240px 60px;
-      animation: swing 2.8s cubic-bezier(0.37,0,0.63,1) infinite alternate;
-    }
-    @keyframes swing {
-      from { transform: rotate(-28deg); }
-      to   { transform: rotate( 28deg); }
-    }
-
-    /* Trail / shadow pendulums */
-    .trail-1 {
-      opacity: 0.18;
-      transform-origin: 240px 60px;
-      animation: swing 2.8s cubic-bezier(0.37,0,0.63,1) infinite alternate;
-      animation-delay: -0.12s;
-    }
-    .trail-2 {
-      opacity: 0.08;
-      transform-origin: 240px 60px;
-      animation: swing 2.8s cubic-bezier(0.37,0,0.63,1) infinite alternate;
-      animation-delay: -0.24s;
-    }
-
-    /* Arc trace */
-    .arc-path {
-      fill: none;
-      stroke: var(--gold);
-      stroke-width: 1;
-      stroke-dasharray: 4 6;
-      opacity: 0.2;
-    }
-
-    /* Info cards */
-    .info-row {
-      position: relative;
-      z-index: 10;
-      display: flex;
-      gap: 20px;
-      margin-top: 8px;
-      flex-wrap: wrap;
-      justify-content: center;
-      padding: 0 16px;
-    }
-    .card {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(201,168,76,0.2);
-      border-radius: 4px;
-      padding: 16px 24px;
-      text-align: center;
-      min-width: 120px;
-      backdrop-filter: blur(4px);
-      transition: border-color 0.3s;
-    }
-    .card:hover {
-      border-color: rgba(201,168,76,0.6);
-    }
-    .card-value {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.7rem;
-      color: var(--gold-light);
-      font-weight: 300;
-    }
-    .card-label {
-      margin-top: 4px;
-      font-size: 0.58rem;
-      letter-spacing: 0.4em;
-      color: var(--muted);
-      text-transform: uppercase;
-    }
-
-    /* Quote */
-    .quote {
-      position: relative;
-      z-index: 10;
-      margin-top: 36px;
-      font-family: 'Cormorant Garamond', serif;
-      font-style: italic;
-      font-size: clamp(0.85rem, 2vw, 1rem);
-      color: var(--muted);
-      text-align: center;
-      max-width: 380px;
-      line-height: 1.8;
-      padding: 0 20px 40px;
-    }
-    .quote span {
-      color: rgba(201,168,76,0.5);
-    }
-  </style>
+  <title>Simulátor matematického kyvadla</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Raleway:wght@100;200;300&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/main.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
-  <!-- Stars -->
-  <div class="stars" id="stars"></div>
-  <div class="glow-bg"></div>
+<!-- Background -->
+<div class="stars" id="stars"></div>
+<div class="glow-bg"></div>
 
-  <header>
-    <h1>Kyvadlo</h1>
-    <p>Večný pohyb času</p>
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- Presets Modal -->
+<div class="modal" id="presets-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Prednastavené konfigurácie</h3>
+      <button class="modal-close" onclick="closeModal('presets-modal')">×</button>
+    </div>
+    <div id="presets-list"></div>
+  </div>
+</div>
+
+<div class="app-wrapper">
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-title">
+      <h1>Kyvadlo</h1>
+      <p>Simulátor matematického kyvadla</p>
+    </div>
+    <div class="status-badge">
+      <div class="status-dot offline" id="status-dot"></div>
+      <span id="status-label">Kontrolujem backend…</span>
+    </div>
   </header>
-  <div class="divider"></div>
 
-  <!-- SVG Pendulum -->
-  <div class="stage">
-    <svg viewBox="0 0 480 480" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <!-- Rod gradient -->
-        <linearGradient id="rodGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%"   stop-color="#8a6820"/>
-          <stop offset="50%"  stop-color="#e8c97a"/>
-          <stop offset="100%" stop-color="#8a6820"/>
-        </linearGradient>
-        <!-- Bob gradient -->
-        <radialGradient id="bobGrad" cx="38%" cy="32%" r="60%">
-          <stop offset="0%"   stop-color="#f5e199"/>
-          <stop offset="40%"  stop-color="#c9a84c"/>
-          <stop offset="100%" stop-color="#6b4a10"/>
-        </radialGradient>
-        <!-- Support beam gradient -->
-        <linearGradient id="beamGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#c9a84c"/>
-          <stop offset="100%" stop-color="#4a3510"/>
-        </linearGradient>
-        <!-- Glow filter -->
-        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="4" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-      </defs>
+  <!-- Tabs -->
+  <nav class="tab-nav">
+    <button class="tab-btn active" data-tab="configurations">Konfigurácie</button>
+    <button class="tab-btn" data-tab="simulation">Simulácia</button>
+    <button class="tab-btn" data-tab="compare">Porovnanie metód</button>
+    <button class="tab-btn" data-tab="education">Vzdelávanie</button>
+    <button class="tab-btn" data-tab="history">História</button>
+  </nav>
 
-      <!-- Support beam -->
-      <rect x="180" y="20" width="120" height="8" rx="4" fill="url(#beamGrad)" opacity="0.9"/>
-      <rect x="236" y="28" width="8" height="34" rx="3" fill="url(#beamGrad)" opacity="0.7"/>
+  <!-- ═══ TAB: KONFIGURÁCIE ═══════════════════════════════════════════ -->
+  <section class="tab-content active" id="tab-configurations">
+    <div class="two-col">
 
-      <!-- Arc trace -->
-      <path class="arc-path" d="M 122,360 A 190,190 0 0,1 358,360"/>
+      <!-- Config form -->
+      <div class="panel">
+        <div class="panel-title" id="form-title">
+          Nová konfigurácia
+          <small>fyzikálne parametre</small>
+        </div>
 
-      <!-- Trail 2 -->
-      <g class="trail-2">
-        <line x1="240" y1="60" x2="240" y2="340" class="rod"/>
-        <circle cx="240" cy="345" r="28" class="bob-outer"/>
-      </g>
-      <!-- Trail 1 -->
-      <g class="trail-1">
-        <line x1="240" y1="60" x2="240" y2="340" class="rod"/>
-        <circle cx="240" cy="345" r="28" class="bob-outer"/>
-      </g>
+        <div class="form-group">
+          <label class="form-label">Názov konfigurácie *</label>
+          <input class="form-input" id="config-name" type="text" placeholder="napr. Veľká výchylka 30°"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Popis (voliteľné)</label>
+          <textarea class="form-textarea" id="config-desc" placeholder="Opis konfigurácie…"></textarea>
+        </div>
 
-      <!-- Main pendulum -->
-      <g class="pendulum-group" filter="url(#glow)">
-        <line x1="240" y1="60" x2="240" y2="340" class="rod"/>
-        <!-- Bob layers -->
-        <circle cx="240" cy="345" r="32" class="bob-outer"/>
-        <circle cx="240" cy="345" r="24" class="bob-inner"/>
-        <ellipse cx="232" cy="336" rx="8" ry="5" class="bob-shine"/>
-        <!-- Bob detail ring -->
-        <circle cx="240" cy="345" r="32" fill="none" stroke="rgba(255,240,180,0.25)" stroke-width="1.5"/>
-        <circle cx="240" cy="345" r="20" fill="none" stroke="rgba(255,240,180,0.1)" stroke-width="1"/>
-      </g>
+        <div class="form-group">
+          <label class="form-label">Dĺžka kyvadla L (m)</label>
+          <div class="slider-row">
+            <input type="range" id="slider-length" min="0.1" max="5" step="0.1" value="1.0"/>
+            <input type="number" class="num-input" id="input-length" min="0.1" max="5" step="0.1" value="1.0"/>
+          </div>
+        </div>
 
-      <!-- Pivot cap -->
-      <circle cx="240" cy="60" r="9" class="pivot-cap"/>
-      <circle cx="240" cy="60" r="5" fill="#f5e199" opacity="0.8"/>
-    </svg>
-  </div>
+        <div class="form-group">
+          <label class="form-label">Hmotnosť závaží m (kg)</label>
+          <div class="slider-row">
+            <input type="range" id="slider-mass" min="0.1" max="100" step="0.1" value="1.0"/>
+            <input type="number" class="num-input" id="input-mass" min="0.1" max="100" step="0.1" value="1.0"/>
+          </div>
+        </div>
 
-  <!-- Info cards -->
-  <div class="info-row">
-    <div class="card">
-      <div class="card-value">2.8s</div>
-      <div class="card-label">Perióda</div>
+        <div class="form-group">
+          <label class="form-label">Koeficient tlmenia c (kg·m²/s)</label>
+          <div class="slider-row">
+            <input type="range" id="slider-damping" min="0" max="2" step="0.01" value="0"/>
+            <input type="number" class="num-input" id="input-damping" min="0" max="2" step="0.01" value="0"/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Počiatočný uhol θ₀ (°)</label>
+          <div class="slider-row">
+            <input type="range" id="slider-initial-angle" min="-180" max="180" step="0.5" value="10"/>
+            <input type="number" class="num-input" id="input-initial-angle" min="-180" max="180" step="0.5" value="10"/>
+          </div>
+          <!-- Angle zone indicator -->
+          <div class="angle-zone-track">
+            <div class="zone-fill green" id="angle-zone-bar" style="width:5.6%"></div>
+          </div>
+          <div class="zone-label green" id="angle-zone-label">10.0° — Stredný uhol: mierne nelineárne</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Počiatočná uhlová rýchlosť ω₀ (rad/s)</label>
+          <div class="slider-row">
+            <input type="range" id="slider-ang-velocity" min="-10" max="10" step="0.1" value="0"/>
+            <input type="number" class="num-input" id="input-ang-velocity" min="-10" max="10" step="0.1" value="0"/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Časový krok (s)</label>
+          <div class="slider-row">
+            <input type="range" id="slider-time-step" min="0.001" max="0.05" step="0.001" value="0.01"/>
+            <input type="number" class="num-input" id="input-time-step" min="0.001" max="0.05" step="0.001" value="0.01"/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Numerická metóda</label>
+          <select class="form-select" id="method-select">
+            <option value="euler">Euler (1. rád presnosti)</option>
+            <option value="runge_kutta_2">Runge-Kutta 2. rádu</option>
+            <option value="runge_kutta_4" selected>Runge-Kutta 4. rádu (odporúčané)</option>
+            <option value="analytical">Analytická (len pre θ₀ &lt; 5°)</option>
+          </select>
+        </div>
+
+        <!-- Method warning -->
+        <div class="method-warning" id="method-warning"></div>
+
+        <!-- Backend warnings / info -->
+        <div class="backend-warnings" id="backend-warnings"></div>
+        <div class="backend-info" id="backend-info"></div>
+
+        <!-- Characteristics -->
+        <div class="characteristics-panel" id="characteristics-panel"></div>
+
+        <div class="btn-row">
+          <button class="btn btn-secondary" id="btn-load-presets">📋 Presety</button>
+          <button class="btn btn-primary" id="btn-save-config">Uložiť konfiguráciu</button>
+          <button class="btn btn-ghost" id="btn-cancel-edit" style="display:none">Zrušiť</button>
+        </div>
+      </div>
+
+      <!-- Config list -->
+      <div class="panel">
+        <div class="panel-title">
+          Uložené konfigurácie
+          <small>klikni na "Spustiť" pre simuláciu</small>
+        </div>
+
+        <div class="filter-bar">
+          <button class="filter-btn active" data-filter="all">Všetky</button>
+          <button class="filter-btn" data-filter="small">🟢 Malé uhly</button>
+          <button class="filter-btn" data-filter="large">🔴 Veľké uhly</button>
+        </div>
+
+        <div class="config-list" id="config-list">
+          <div class="empty-state">Načítavam konfigurácie…</div>
+        </div>
+      </div>
+
     </div>
-    <div class="card">
-      <div class="card-value">28°</div>
-      <div class="card-label">Amplitúda</div>
-    </div>
-    <div class="card">
-      <div class="card-value">L</div>
-      <div class="card-label">Dĺžka</div>
-    </div>
-    <div class="card">
-      <div class="card-value">g</div>
-      <div class="card-label">Gravitácia</div>
-    </div>
-  </div>
+  </section>
 
-  <p class="quote">
-    <span>„</span>Kyvadlo nemerá čas —<br/>
-    čas meria kyvadloaaaa.<span>"</span>
-  </p>
+  <!-- ═══ TAB: SIMULÁCIA ══════════════════════════════════════════════ -->
+  <section class="tab-content" id="tab-simulation">
+    <div class="sim-layout">
 
-  <script>
-    // Generate random stars
-    const starsEl = document.getElementById('stars');
-    for (let i = 0; i < 140; i++) {
-      const s = document.createElement('div');
-      s.className = 'star';
-      const size = Math.random() * 2 + 0.5;
-      s.style.cssText = `
-        width:${size}px; height:${size}px;
-        top:${Math.random()*100}%;
-        left:${Math.random()*100}%;
-        --dur:${(Math.random()*3+2).toFixed(1)}s;
-        --op:${(Math.random()*0.7+0.1).toFixed(2)};
-        animation-delay:${(Math.random()*4).toFixed(1)}s;
-      `;
-      starsEl.appendChild(s);
-    }
-  </script>
+      <!-- Controls bar -->
+      <div class="sim-controls-bar">
+        <div>
+          <div class="sim-config-label">Aktívna konfigurácia</div>
+          <div class="sim-config-name" id="sim-config-name">— nevybraná —</div>
+          <input type="hidden" id="selected-config-id"/>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Trvanie (s)</label>
+          <div class="slider-row">
+            <input type="range" id="sim-duration-slider" min="1" max="120" step="1" value="20"
+              oninput="document.getElementById('sim-duration').value=this.value"/>
+            <input type="number" class="num-input" id="sim-duration" min="1" max="120" step="1" value="20"
+              oninput="document.getElementById('sim-duration-slider').value=this.value"/>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <button class="btn btn-primary" id="btn-start-sim">▶ Spustiť</button>
+          <button class="btn btn-danger" id="btn-stop-sim" disabled>⬛ Stop</button>
+          <button class="btn btn-ghost" id="btn-reset-sim">↺ Reset</button>
+          <button class="btn btn-secondary" id="btn-compare-analytical">⚖️ Porovnať s analytickou</button>
+          <button class="btn btn-ghost" onclick="exportCSV()">⬇ Export CSV</button>
+          <span class="sim-status idle" id="sim-status">Pripravená</span>
+        </div>
+
+        <div class="sim-info-panel" id="sim-info-panel"></div>
+      </div>
+
+      <!-- Pendulum canvas -->
+      <div class="canvas-container">
+        <canvas id="pendulum-canvas"></canvas>
+      </div>
+
+      <!-- Live values -->
+      <div class="live-values">
+        <div class="val-item"><span class="val-label">Čas</span><span class="val-num" id="val-time">—</span></div>
+        <div class="val-item"><span class="val-label">Uhol θ</span><span class="val-num" id="val-angle">—</span></div>
+        <div class="val-item"><span class="val-label">Uhlová rýchlosť ω</span><span class="val-num" id="val-omega">—</span></div>
+        <div class="val-item"><span class="val-label">Akcelerácia α</span><span class="val-num" id="val-alpha">—</span></div>
+        <div class="val-item"><span class="val-label">Kin. energia Ek</span><span class="val-num" id="val-ek">—</span></div>
+        <div class="val-item"><span class="val-label">Pot. energia Ep</span><span class="val-num" id="val-ep">—</span></div>
+        <div class="val-item"><span class="val-label">Celková energia E</span><span class="val-num" id="val-et">—</span></div>
+        <div class="val-item"><span class="val-label">Strata (tlmenie)</span><span class="val-num" id="val-loss">—</span></div>
+        <div class="val-item"><span class="val-label">Turning point</span><span class="val-num" id="val-turning" style="font-size:0.8rem">—</span></div>
+      </div>
+
+      <!-- Charts 2×2 -->
+      <div class="charts-area">
+        <div class="chart-box"><canvas id="chart-angle"></canvas></div>
+        <div class="chart-box"><canvas id="chart-velocity"></canvas></div>
+        <div class="chart-box"><canvas id="chart-phase"></canvas></div>
+        <div class="chart-box"><canvas id="chart-energy"></canvas></div>
+      </div>
+
+      <!-- Completed stats -->
+      <div class="completed-stats" id="completed-stats"></div>
+
+    </div>
+  </section>
+
+  <!-- ═══ TAB: POROVNANIE METÓD ════════════════════════════════════════ -->
+  <section class="tab-content" id="tab-compare">
+    <div class="compare-layout">
+
+      <div class="panel">
+        <div class="panel-title">Nastavenie porovnania</div>
+
+        <div class="form-group">
+          <label class="form-label">Konfigurácia</label>
+          <select class="form-select" id="compare-config-select">
+            <option value="">— Vyber konfiguráciu —</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Trvanie simulácie (s)</label>
+          <div class="slider-row">
+            <input type="range" id="compare-dur-slider" min="5" max="60" step="1" value="15"
+              oninput="document.getElementById('compare-duration').value=this.value"/>
+            <input type="number" class="num-input" id="compare-duration" min="5" max="60" step="1" value="15"
+              oninput="document.getElementById('compare-dur-slider').value=this.value"/>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" id="btn-start-compare" style="width:100%; margin-top:8px">⚖️ Spustiť porovnanie</button>
+
+        <div class="tooltip-card" style="margin-top:16px">
+          <h4>Čo porovnávame?</h4>
+          Euler (červená) — najmenej presná, 1. rád<br/>
+          RK4 (modrá) — najpresnejšia, 4. rád<br/>
+          Analytická (zelená) — presná <span class="math">len pre θ₀ &lt; 5°</span>
+          <br/><br/>
+          Pre veľké uhly uvidíš ako sa analytická metóda odchyľuje od RK4.
+        </div>
+
+        <div id="compare-results"></div>
+      </div>
+
+      <div class="compare-chart-box">
+        <canvas id="chart-compare"></canvas>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══ TAB: VZDELÁVANIE ════════════════════════════════════════════ -->
+  <section class="tab-content" id="tab-education">
+
+    <div class="edu-layout">
+
+      <!-- sin vs theta -->
+      <div class="panel">
+        <div class="panel-title">Aproximácia sin(θ) ≈ θ</div>
+
+        <div class="form-group">
+          <label class="form-label">Uhol θ₀ = <span id="edu-angle-display">0°</span></label>
+          <input type="range" id="edu-angle-slider" min="0" max="90" step="0.5" value="10" style="width:100%"/>
+          <div id="edu-approx-error" class="approx-error green" style="margin-top:8px">—</div>
+        </div>
+
+        <div class="tooltip-card">
+          <h4>Linearizácia</h4>
+          Pre malé uhly platí: <span class="math">sin(θ) ≈ θ</span><br/>
+          Táto aproximácia linearizuje pohybovú rovnicu kyvadla a umožňuje analytické riešenie.<br/><br/>
+          <span class="math">θ̈ + (g/L)·sin(θ) = 0</span><br/>
+          sa zjednodušuje na:<br/>
+          <span class="math">θ̈ + (g/L)·θ = 0</span>
+          <br/><br/>
+          Chyba &lt; 0.1% pre θ &lt; 5°, ale rastie rýchlo pre väčšie uhly.
+        </div>
+
+        <div class="chart-box" style="margin-top:12px; min-height:250px">
+          <canvas id="chart-sine-approx"></canvas>
+        </div>
+      </div>
+
+      <!-- Isochronism -->
+      <div class="panel">
+        <div class="panel-title">Neizochronizmus kyvadla</div>
+
+        <div class="tooltip-card">
+          <h4>Čo je izochronizmus?</h4>
+          Pre malé uhly je perióda kyvadla konštantná a nezávisí od amplitúdy:<br/>
+          <span class="math">T₀ = 2π√(L/g)</span><br/><br/>
+          Pre väčšie uhly platí aproximácia:<br/>
+          <span class="math">T ≈ T₀·[1 + ¼sin²(θ₀/2) + ...]</span><br/><br/>
+          Kyvadlo s väčšou amplitúdou má dlhšiu periódu — to je <b>neizochronizmus</b>.
+        </div>
+
+        <div class="chart-box" style="margin-top:12px; min-height:250px">
+          <canvas id="chart-isochronism"></canvas>
+        </div>
+      </div>
+
+      <!-- Tooltip: Numerické metódy -->
+      <div class="panel">
+        <div class="panel-title">Numerické metódy</div>
+
+        <div class="tooltip-card">
+          <h4>Eulerova metóda (1. rád)</h4>
+          Jednoduchá, rýchla, ale nepresná.<br/>
+          <span class="math">θ(t+Δt) = θ(t) + Δt·ω(t)</span><br/>
+          Vhodná pre krátke simulácie a malé kroky.
+        </div>
+        <div class="tooltip-card">
+          <h4>Runge-Kutta 4. rádu (4. rád)</h4>
+          Najpresnejšia zo štandardných metód.<br/>
+          Vypočíta 4 medzikroky a kombinuje ich.<br/>
+          <b>Odporúčaná pre všetky simulácie s θ₀ ≥ 5°.</b>
+        </div>
+        <div class="tooltip-card">
+          <h4>Analytická metóda</h4>
+          Presné riešenie linearizovanej rovnice.<br/>
+          <span class="math">θ(t) = θ₀·e<sup>-γt</sup>·cos(ω_d·t)</span><br/>
+          Platí <b>iba pre θ₀ &lt; 5°</b>. Pre väčšie uhly spôsobuje chyby.
+        </div>
+
+        <!-- Quick launch -->
+        <div style="margin-top:16px">
+          <label class="form-label">Rýchle experimenty</label>
+          <div class="edu-presets">
+            <button class="edu-preset-btn" data-angle="3" title="Analytické riešenie platné, izochronizmus">θ₀ = 3° (Malé oscilácie)</button>
+            <button class="edu-preset-btn" data-angle="15" title="Mierne nelineárne správanie">θ₀ = 15° (Stredné)</button>
+            <button class="edu-preset-btn" data-angle="60" title="Výrazný neizochronizmus">θ₀ = 60° (Veľké)</button>
+            <button class="edu-preset-btn" data-angle="170" title="Takmer vertikálna poloha">θ₀ = 170° (Extrémne)</button>
+          </div>
+          <div style="font-size:0.72rem; color:var(--muted); margin-top:8px">
+            Kliknutím predvyplníš formulár v záložke "Konfigurácie".
+          </div>
+        </div>
+      </div>
+
+      <!-- Damping types -->
+      <div class="panel">
+        <div class="panel-title">Typy tlmenia</div>
+        <div class="tooltip-card">
+          <h4>Netlmené (c = 0)</h4>
+          Kyvadlo kmitá donekonečna. Celková energia sa zachováva.<br/>
+          <span class="math">γ = 0</span>
+        </div>
+        <div class="tooltip-card">
+          <h4>Podkritické (γ &lt; ω₀)</h4>
+          Oscilácie postupne slabnú. Kyvadlo sa zastaví po dlhom čase.<br/>
+          <span class="math">γ = c / (2mL²), γ &lt; ω₀</span>
+        </div>
+        <div class="tooltip-card">
+          <h4>Kritické (γ = ω₀)</h4>
+          Najrýchlejší návrat do rovnovážnej polohy bez kmitania.
+        </div>
+        <div class="tooltip-card">
+          <h4>Nadkritické (γ &gt; ω₀)</h4>
+          Pomalý exponenciálny návrat bez kmitania.<br/>
+          Kyvadlo "plazí" sa do rovnovážnej polohy.
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══ TAB: HISTÓRIA ═══════════════════════════════════════════════ -->
+  <section class="tab-content" id="tab-history">
+    <div class="panel">
+      <div class="panel-title">História simulácií</div>
+      <div class="history-list" id="history-list">
+        <div class="empty-state">Načítavam históriu…</div>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /app-wrapper -->
+
+<!-- Scripts -->
+<script>
+  // Generate stars
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 120; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2 + 0.5;
+    s.style.cssText = `width:${size}px;height:${size}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--dur:${(Math.random()*3+2).toFixed(1)}s;--op:${(Math.random()*0.6+0.1).toFixed(2)};animation-delay:${(Math.random()*5).toFixed(1)}s;`;
+    starsEl.appendChild(s);
+  }
+</script>
+<script src="js/api.js"></script>
+<script src="js/simulation.js"></script>
+<script src="js/canvas.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
