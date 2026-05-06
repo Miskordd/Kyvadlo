@@ -1,4 +1,4 @@
-const API_BASE = 'http://192.168.56.10:8000';
+const API_BASE = 'http://localhost:8000';
 
 const api = {
     async request(method, endpoint, body = null) {
