@@ -1,4 +1,4 @@
-const API_BASE = 'http://82.25.97.52:8000';
+const API_BASE = 'http://82.25.97.52:8888';
 
 const api = {
     async request(method, endpoint, body = null) {
